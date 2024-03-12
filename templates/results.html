@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../../SoftEngProj/application.py"></script>
+    <meta charset="utf-8">
+    <title>FHIR Visualiation</title>
+</head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<body>
+<div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="mySidebar">
+  <button class="w3-bar-item w3-button w3-large"
+  onclick="w3_close()">Close &times;</button>
+  <button class="w3-button w3-block w3-left-align" id = "clinicalBtn" onclick="myAccFunc(0)">
+  Clinical <i class="fa fa-caret-down"></i>
+  </button>
+  <div id="clinicalAcc" class="w3-hide w3-white w3-card">
+    <a href="#" class="w3-bar-item w3-button">&#8226;Allergy</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Problem</a> 		
+    <a href="#" class="w3-bar-item w3-button">&#8226;Procedure</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;CarePlan</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Goal</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Family History</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;RiskAssessment</a>
+  </div>
+  
+  <button class="w3-button w3-block w3-left-align" id="diagnosticBtn" onclick="myAccFunc(1)">
+  Diagnostics<i class="fa fa-caret-down"></i>
+  </button>
+   <div id="diagnosticAcc" class="w3-hide w3-white w3-card">
+    <a href="#" class="w3-bar-item w3-button">&#8226;Observation</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Report</a> 		
+    <a href="#" class="w3-bar-item w3-button">&#8226;Specimen</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;ImagingStudy</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Genomics</a>
+    
+  </div>
+  
+  <button class="w3-button w3-block w3-left-align" id="medicationBtn" onclick="myAccFunc(2)">
+  Medications<i class="fa fa-caret-down"></i>
+  </button>
+   <div id="medicationAcc" class="w3-hide w3-white w3-card">
+    <a href="#" class="w3-bar-item w3-button">&#8226;Medications</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Request</a> 		
+    <a href="#" class="w3-bar-item w3-button">&#8226;Dispense</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Administration</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Statement</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Immunization</a>
+  </div>
+  
+  <button class="w3-button w3-block w3-left-align" id="workflowBtn" onclick="myAccFunc(3)">
+  Work Flow<i class="fa fa-caret-down"></i>
+  </button>
+   <div id="workflowAcc" class="w3-hide w3-white w3-card">
+    <a href="#" class="w3-bar-item w3-button">&#8226;Introduction + Task</a>	
+    <a href="#" class="w3-bar-item w3-button">&#8226;Appointment</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Schedule</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Referral</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;PlanDefinition</a>
+  </div>
+  
+  <button class="w3-button w3-block w3-left-align" id="financialBtn" onclick="myAccFunc(4)">
+  Financial<i class="fa fa-caret-down"></i>
+  </button>
+   <div id="financialAcc" class="w3-hide w3-white w3-card">
+    <a href="#" class="w3-bar-item w3-button">&#8226;Claim</a>	
+    <a href="#" class="w3-bar-item w3-button">&#8226;Account</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Invoice</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;ChargeItem</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Coverage + Eligibility</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Request & Response</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;ExplanationOfBenefit</a>
+  </div>
+</div>
+
+<div id="main">
+
+<div class="w3-teal">
+  <button id="openNav" class="w3-button w3-teal w3-xlarge" onclick="w3_open()">&#9776;</button>
+  <div class="w3-container">
+    <h1>FHIR Visualization</h1>
+  </div>
+</div>
+
+<div class="w3-container">
+
+<p>Welcome, {{ username }}!</p>
+    <form action="/results" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required><br>
+        <input type="submit" value="Upload">
+    </form>
+    
+    {% if uploaded_filename %}
+    <a href="/download/{{ uploaded_filename }}">Download Your File</a>
+    {% endif %}
+</div>
+<a href="/login">Login</a>
+<br>
+<a href="/worker_login">Employee Login</a>
+<br>
+<a href="/">Home Page </a>
+</div>
+
+<script>
+function w3_open() {
+  document.getElementById("main").style.marginLeft = "25%";
+  document.getElementById("mySidebar").style.width = "25%";
+  document.getElementById("mySidebar").style.display = "block";
+  document.getElementById("openNav").style.display = 'none';
+}
+function w3_close() {
+  document.getElementById("main").style.marginLeft = "0%";
+  document.getElementById("mySidebar").style.display = "none";
+  document.getElementById("openNav").style.display = "inline-block";
+}
+function myAccFunc(tabIndex) {
+  var x = document.getElementById("clinicalAcc");
+  var y = document.getElementById("diagnosticAcc");
+  var z = document.getElementById("medicationAcc");
+  var a = document.getElementById("workflowAcc");
+  var b = document.getElementById("financialAcc");
+
+  switch(tabIndex) {
+    case 0:
+      if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+        document.getElementById("clinicalBtn").classList.add("w3-green");
+      } else { 
+        x.className = x.className.replace(" w3-show", "");
+        document.getElementById("clinicalBtn").classList.remove("w3-green");
+      }
+      break;
+    case 1:
+      if (y.className.indexOf("w3-show") == -1) {
+        y.className += " w3-show";
+        document.getElementById("diagnosticBtn").classList.add("w3-green");
+      } else { 
+        y.className = y.className.replace(" w3-show", "");
+        document.getElementById("diagnosticBtn").classList.remove("w3-green");
+      }
+      break;
+    case 2:
+      if (z.className.indexOf("w3-show") == -1) {
+        z.className += " w3-show";
+        document.getElementById("medicationBtn").classList.add("w3-green");
+      } else { 
+        z.className = z.className.replace(" w3-show", "");
+        document.getElementById("medicationBtn").classList.remove("w3-green");
+      }
+      break;
+    case 3:
+      if (a.className.indexOf("w3-show") == -1) {
+        a.className += " w3-show";
+        document.getElementById("workflowBtn").classList.add("w3-green");
+      } else { 
+        a.className = a.className.replace(" w3-show", "");
+        document.getElementById("workflowBtn").classList.remove("w3-green");
+      }
+      break;
+    case 4:
+      if (b.className.indexOf("w3-show") == -1) {
+        b.className += " w3-show";
+        document.getElementById("financialBtn").classList.add("w3-green");
+      } else { 
+        b.className = b.className.replace(" w3-show", "");
+        document.getElementById("financialBtn").classList.remove("w3-green");
+      }
+      break;
+  }
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+</script>
+
+
+</body>
+</html>
+

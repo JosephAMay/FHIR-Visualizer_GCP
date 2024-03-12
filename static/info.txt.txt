@@ -1,0 +1,1 @@
+This is the folder images and css goes in for the html templates. 
