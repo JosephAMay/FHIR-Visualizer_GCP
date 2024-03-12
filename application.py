@@ -35,7 +35,6 @@ Condition --> bodysite, severity, committimestamp
 Medication request->insurance->coverageid, priority,->medication->reference->medicationID
 Procedure->basedon->careplanId/servicerequestID,locaion->locationID, performed->dateTime,performed->age
 
-
 '''
 
 bqClient = bigquery.Client(project='fhir-visualization-project')
@@ -61,8 +60,8 @@ def query_database(username, password,tablename):
     result = cursor.fetchone()
     print('query result is ==',result)
     return result
+
 def bigquery_lookup(qtype):
-    # Replace with your project ID, dataset ID, and table ID
     project_id = "fhir-visualization-project"
     dataset_id = "dataset1"
 
@@ -70,6 +69,7 @@ def bigquery_lookup(qtype):
         table_id = "Patient"
     elif qtype=='records':
         table_id = 'Records'
+    
     # Construct the fully qualified table reference
     table_ref = f"{project_id}.{dataset_id}.{table_id}"
     print('Query Type=', qtype, '\nTableRef = ', table_ref)
@@ -127,7 +127,7 @@ def handle_connect():
         socket_number = available_sockets.pop(0)
         client_sid = request.sid
         clients.append({'sid': client_sid, 'socket_number': socket_number})
-        print(f'Length of clients is: {len(clients)}')
+        #print(f'Length of clients is: {len(clients)}')
         #print('clients:')
         #for i in clients:
         #    print(i)
@@ -171,29 +171,20 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = query_database(username, password, 'user')
-        print('User is:', user)
-        if user is not None:
+        worker = query_database(username, password, 'worker')
+        if worker is not None:
             session['username'] = username
+            session['role'] = 'employee'
             return redirect(url_for('results'))
+        elif user is not None:
+            session['username'] = username
+            session['role'] = 'user'
+            return redirect(url_for('results'))
+        
     return render_template('login.html')
 
-@app.route('/worker_login', methods=['GET', 'POST'])
-def workerlogin():
-    global OVER_CAPACITY
-    if (OVER_CAPACITY):
-        return render_template('about.html', full = True)
 
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = query_database(username, password, 'worker')
-        print('Worker User is:', user)
-        if user is not None:
-            session['username'] = username
-            return redirect(url_for('results'))
-    return render_template('worker_login.html')
-
-@app.route('/results', methods=['GET', 'POST'])
+@app.route('/FHIR-Visualization', methods=['GET', 'POST'])
 def results():
     global OVER_CAPACITY
     #IF website at max client capacity, send to wait area
@@ -206,7 +197,7 @@ def results():
     print('Trying BQ Func')
     result = bigquery_lookup('patient')
     print(result)
-    return render_template('results.html', username=username)
+    return render_template('fhir_vizualizer.html', username=username)
     #return render_template('about.html')
 
 #After the user has submitted a file and it is classified, send modified folder to their downloads folder

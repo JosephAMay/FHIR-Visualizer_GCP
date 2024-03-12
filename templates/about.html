@@ -1,11 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>About Page</title>
+    <script src="../application.py"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>About Us</title>
+
+    <style>
+        .w3-teal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .username {
+            margin-right: 20px; /* Adjust the margin as needed */
+        }
+    </style>
+
 </head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <body>
-    <h1>About Page</h1>
-    <p>
+
+<div class="w3-teal">
+    <div class="w3-container">
+        <h1>FHIR Visualization</h1>
+    </div>
+    <div class="username">
+        {% if 'username' in session %}
+            <h1>{{session['username']}}</h1><p>Add Logout</p>
+        {% else %}
+            <h1>Welcome!</h1>
+        {% endif %}
+    </div>
+</div>
+
+<h1>About Page</h1>
+<p>
 Fast Healthcare Interoperability Resources (FHIR) data represents a modern approach to healthcare data exchange and interoperability standards. FHIR is designed to enable the seamless sharing of electronic healthcare information across different systems, allowing healthcare providers, patients, and other stakeholders to access and exchange data efficiently.
 <br>
 <h3>Usage:</h3><br>
@@ -17,8 +60,15 @@ The importance of FHIR data lies in its ability to break down data silos and pro
 Welcome to our web portal for visualizing patient data through FHIR! Whether you're a healthcare provider, a developer, or a patient seeking insights into your health information, our platform offers intuitive tools to explore and analyze FHIR data in real-time. With our user-friendly interface, you can gain valuable insights, track trends, and collaborate with care teams more effectively. Join us in harnessing the power of FHIR to transform healthcare delivery and improve patient outcomes. Start visualizing your data today!
 </p>
 <br>
-<a href="/login">User Login</a>
+<div id ="pageButtons"  style="text-align: center;">
+{% if 'username' in session %}
+<button class="w3-button w3-teal w3-xlarge" onclick="window.location.href='/FHIR-Visualization'">FHIR-Visualizer</button>
+    
+{% else %}
+    <button class="w3-button w3-teal w3-xlarge" onclick="window.location.href='/login'">Login</button>
+{% endif %}
+</div>
+
 <br>
-<a href="/worker_login">Employee Login</a>    
 </body>
 </html>
