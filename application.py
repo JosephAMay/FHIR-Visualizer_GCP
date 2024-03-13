@@ -69,7 +69,9 @@ def bigquery_lookup(qtype):
         table_id = "Patient"
     elif qtype=='records':
         table_id = 'Records'
-    
+    print('REST of BQ lookup commented out, line 72ish')
+    results = None
+    '''
     # Construct the fully qualified table reference
     table_ref = f"{project_id}.{dataset_id}.{table_id}"
     print('Query Type=', qtype, '\nTableRef = ', table_ref)
@@ -116,6 +118,7 @@ def bigquery_lookup(qtype):
     plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
     plt.tight_layout()
     plt.savefig('GraphName.png')
+    '''
     return results 
 
 #Handle client connections

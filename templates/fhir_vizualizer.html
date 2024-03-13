@@ -105,7 +105,7 @@
     <h1>FHIR Visualization</h1>
   </div>
   <div class="username">
-    <h1>{{ username }}</h1>
+    <h1>{{ username }}</h1><p>Add Logout</p>
   </div>
 </div>
 
@@ -121,9 +121,9 @@
     <a href="/download/{{ uploaded_filename }}">Download Your File</a>
     {% endif %}
 </div>
-<a href="/login">Login</a>
-<br>
-<a href="/">Home Page </a>
+<button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/'">Homepage</button>
+<button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/login'">Login</button>
+
 </div>
 
 <script>

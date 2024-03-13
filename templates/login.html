@@ -7,6 +7,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Login</title>
+    <style>
+        
+
+        .login-container {
+            width: 400px; /* Adjust the width of the container as needed */
+            padding: 20px;
+            border: 3px solid #ccc; /* Add border for the box */
+            border-radius: 5px; /* Add border radius for rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add box shadow for depth */
+            text-align: center; /* Center the content horizontally */
+            
+        }
+        .login-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }   
+        .homeButton{
+            position: absolute;
+            top: 115%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+       
+        
+    </style>
+    
 </head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,18 +43,22 @@
 
 
 <body>
-    <div class="w3-teal">
+    <div class="w3-teal" style="text-align: center;">
         <div class="w3-container">
             <h1>Login</h1>
         </div>
     </div>
     
+    <div class="login-wrapper"> 
+        <form action="/login" method="post" class = "login-container">
+            <input type="text" name="username" placeholder="Username" required><br>
+            <input type="password" name="password" placeholder="Password" required><br>
+            <input type="submit" class="w3-button w3-teal" value="Login">
+            
+        </form>
+        <button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/'">Homepage</button>
+    </div>
     
-    <form action="/login" method="post">
-        <input type="text" name="username" placeholder="Username" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
-        <input type="submit" value="Login">
-    </form>
-<a href="/">About Us</a>
+
 </body>
 </html>
