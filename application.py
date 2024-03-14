@@ -11,6 +11,7 @@ from google.cloud import bigquery
 import matplotlib.pyplot as plt
 from collections import Counter
 import datetime
+from functools import wraps
 #Add folder housing the project to the filepath
 bigfolder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(bigfolder_path)
@@ -28,14 +29,7 @@ socketio = SocketIO(app)
 #Possible client connections
 available_sockets = list(range(1, MAX_CLIENTS+1))
 clients = []
-'''
-Patient - by gender, by age, ethnicity, 
-RACTITIONER: by age, gender, qualification->issuer->organizationId/reference, qualification->period->start/end,
-Condition --> bodysite, severity, committimestamp
-Medication request->insurance->coverageid, priority,->medication->reference->medicationID
-Procedure->basedon->careplanId/servicerequestID,locaion->locationID, performed->dateTime,performed->age
 
-'''
 
 bqClient = bigquery.Client(project='fhir-visualization-project')
 db = mysql.connector.connect(
@@ -139,20 +133,11 @@ def handle_connect():
 
 #Handle client disconnections
 #Remove from clients list, add socket back to list of available sockets. 
-@socketio.on('disconnect')
-def handle_disconnect():
-    global OVER_CAPACITY
-    client_sid = request.sid
-    disconnected_client = next((client for client in clients if client['sid'] == client_sid), None)
-    
-    if disconnected_client:
-        # Add the socket number back to available_sockets
-        available_sockets.append(disconnected_client['socket_number'])
-        # Remove the disconnected client from the clients list
-        clients.remove(disconnected_client)
-        OVER_CAPACITY = False
-        print('Disconnect: Length of clients is:', len(clients))
 
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 @socketio.on('upload_file')
 def handle_upload(data):
@@ -163,6 +148,18 @@ def handle_upload(data):
         accept_uploaded_file(uploaded_file, socket_number)
         #result = self.process_csv(f"uploads/{uploaded_file.filename}")
         emit('csv_processed', {'socket_number': socket_number, 'result': result})
+
+# Define a decorator function to check if the user is logged in
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check if 'username' key exists in the session
+        if 'username' not in session:
+            # If user is not logged in, redirect to the login page
+            return redirect(url_for('login'))
+        # If user is logged in, proceed with the original function
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -177,18 +174,19 @@ def login():
         worker = query_database(username, password, 'worker')
         if worker is not None:
             session['username'] = username
-            session['role'] = 'employee'
-            return redirect(url_for('results'))
+            session['role'] = 'admin'
+            return redirect(url_for('vizHomepage'))
         elif user is not None:
             session['username'] = username
             session['role'] = 'user'
-            return redirect(url_for('results'))
+            return redirect(url_for('vizHomepage'))
         
     return render_template('login.html')
 
-
+#Page showing options for Visualization
 @app.route('/FHIR-Visualization', methods=['GET', 'POST'])
-def results():
+@login_required
+def vizHomepage():
     global OVER_CAPACITY
     #IF website at max client capacity, send to wait area
     if(OVER_CAPACITY):
@@ -197,10 +195,8 @@ def results():
     #if user is logged in take their file
     if 'username' in session:
         username = session['username']
-    print('Trying BQ Func')
-    result = bigquery_lookup('patient')
-    print(result)
-    return render_template('fhir_vizualizer.html', username=username)
+        role = session['role']
+    return render_template('fhir_vizualizer.html', username=username, role=role)
     #return render_template('about.html')
 
 #After the user has submitted a file and it is classified, send modified folder to their downloads folder
@@ -210,7 +206,6 @@ def download_file(filename):
     downloads_folder = os.path.expanduser("~")
     file_path = os.path.join(downloads_folder, filename)
     return send_file(file_path, as_attachment=True)
-
 
 #home page
 @app.route('/')
@@ -224,6 +219,31 @@ def about():
     if(not OVER_CAPACITY):
         return render_template('about.html')
     
+
+@app.route('/patient', methods=['GET', 'POST'])
+@login_required
+def patient():
+    return render_template('patient.html', username=session['username'],role=session['role'])
+
+@app.route('/practitioner', methods=['GET', 'POST'])
+@login_required
+def practitioner():
+    return render_template('practitioner.html', username=session['username'],role=session['role'])
+
+@app.route('/claim', methods=['GET', 'POST'])
+@login_required
+def claim():
+    return render_template('claim.html', username=session['username'],role=session['role'])
+
+@app.route('/medRequest', methods=['GET', 'POST'])
+@login_required
+def medrequest():
+    return render_template('medRequest.html', username=session['username'],role=session['role'])
+
+@app.route('/procedure', methods=['GET', 'POST'])
+@login_required
+def procedure():
+    return render_template('procedure.html', username=session['username'],role=session['role'])
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

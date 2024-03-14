@@ -40,7 +40,7 @@
     </div>
     <div class="username">
         {% if 'username' in session %}
-            <h1>{{session['username']}}</h1><p>Add Logout</p>
+            <h1>{{session['username']}}</h1><p><a href="/logout">Logout</a></p>
         {% else %}
             <h1>Welcome!</h1>
         {% endif %}

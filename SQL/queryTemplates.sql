@@ -32,7 +32,8 @@ select gender from `fhir-visualization-project.dataset1.Practitioner` LIMIT 1000
 #Address
 select a.city, a.postalCode, a.state from `fhir-visualization-project.dataset1.Practitioner`, unnest(address) as a LIMIT 1000;
 #select birthDate from `fhir-visualization-project.dataset1.Practitioner` LIMIT 1000;
-#select qualification[safe_offset(0)].period.end,  qualification[safe_offset(0)].identifier[safe_offset(0)].type.text from `fhir-visualization-project.dataset1.Practitioner` LIMIT 1000;
+#select qualification[safe_offset(0)].period.end,  qualification[safe_offset(0)].identifier[safe_offset(0)].type.text 
+#from `fhir-visualization-project.dataset1.Practitioner` LIMIT 1000;
 #SELECT  id.assigner.identifier.period.start FROM  `fhir-visualization-project.dataset1.Practitioner`, UNNEST(identifier) AS id
 #End Practitioner Queries
 
@@ -51,7 +52,6 @@ select authoredOn from `fhir-visualization-project.dataset1.MedicationRequest` L
 #select insurance[SAFE_OFFSET(0)].coverageId from `fhir-visualization-project.dataset1.MedicationRequest` LIMIT 1000;
 #select priority from `fhir-visualization-project.dataset1.MedicationRequest` LIMIT 1000;
 #select medication.reference.medicationId from `fhir-visualization-project.dataset1.MedicationRequest` LIMIT 1000;
-
 # End Medication Request Queries
 
 #Condition Queries
@@ -81,16 +81,13 @@ CROSS JOIN
 #End condition Queries
 
 #Claim Queries
-
+#Type of claim
 select c.code as claimType from `fhir-visualization-project.dataset1.Claim`, unnest(type.coding) as c LIMIT 1000;
-
-
+#When status of cliam (active,inactive,pause) when it was created, when the date it must be payed by
 select status, created, billablePeriod.end as BillablePeriodEnd from `fhir-visualization-project.dataset1.Claim` LIMIT 1000;
-
-
+#Reason for the claim
 select i.productOrService.text as ReasonForClaim from `fhir-visualization-project.dataset1.Claim`, unnest(item) as i LIMIT 1000;
-
-
+#Show insurance providers and coverage they provide
 SELECT 
   provider.display as InsuranceProvider, 
   i.coverage.display as CoverageType 
@@ -100,7 +97,8 @@ FROM
 GROUP BY 
   provider.display, i.coverage.display 
 LIMIT 1000;
-
+#Total $ 
 SELECT SUM(total.value) AS total_sum
-FROM `fhir-visualization-project.dataset1.Claim`;
+FROM `fhir-visualization-project.dataset1.Claim`
+where status = 'Active';
 #End Claim Queries

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>FHIR Visualiation</title>
+    <title>{% block pageTitle %}FHIR Visualiation: Dashboard {% endblock %}</title>
 
     <style>
       .w3-teal {
@@ -19,14 +19,6 @@
     </style>
 </head>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-<script type="text/javascript" charset="utf-8">
-    var socket = io();
-    socket.on('connect', function() {
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
-</script>
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -39,24 +31,24 @@
   Clinical <i class="fa fa-caret-down"></i>
   </button>
   <div id="clinicalAcc" class="w3-hide w3-white w3-card">
-    <a href="#" class="w3-bar-item w3-button">&#8226;Allergy</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Problem</a> 		
-    <a href="#" class="w3-bar-item w3-button">&#8226;Procedure</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;CarePlan</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Goal</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Family History</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;RiskAssessment</a>
+    <a href="/patient" class="w3-bar-item w3-button">&#8226;Patient</a>
+    <a href="/practitioner" class="w3-bar-item w3-button">&#8226;Practitioner</a> 		
+    <a href="/procedure" class="w3-bar-item w3-button">&#8226;Procedure</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;CarePlan-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Goal-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Family History-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;RiskAssessment-NotImplemented</a>
   </div>
   
   <button class="w3-button w3-block w3-left-align" id="diagnosticBtn" onclick="myAccFunc(1)">
-  Diagnostics<i class="fa fa-caret-down"></i>
+  Diagnostics-Not Implemented<i class="fa fa-caret-down"></i>
   </button>
    <div id="diagnosticAcc" class="w3-hide w3-white w3-card">
-    <a href="#" class="w3-bar-item w3-button">&#8226;Observation</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Report</a> 		
-    <a href="#" class="w3-bar-item w3-button">&#8226;Specimen</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;ImagingStudy</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Genomics</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Observation-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Report-NotImplemented</a> 		
+    <a href="#" class="w3-bar-item w3-button">&#8226;Specimen-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;ImagingStudy-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Genomics-NotImplemented</a>
     
   </div>
   
@@ -64,37 +56,39 @@
   Medications<i class="fa fa-caret-down"></i>
   </button>
    <div id="medicationAcc" class="w3-hide w3-white w3-card">
-    <a href="#" class="w3-bar-item w3-button">&#8226;Medications</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Request</a> 		
-    <a href="#" class="w3-bar-item w3-button">&#8226;Dispense</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Administration</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Statement</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Immunization</a>
+    <a href="/medRequest" class="w3-bar-item w3-button">&#8226;Medication Requests</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Dispense-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Administration-NotImplemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Statement-Not Implemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Immunization-Not Implemented</a>
   </div>
   
   <button class="w3-button w3-block w3-left-align" id="workflowBtn" onclick="myAccFunc(3)">
-  Work Flow<i class="fa fa-caret-down"></i>
+  Work Flow-Not Implemented<i class="fa fa-caret-down"></i>
   </button>
    <div id="workflowAcc" class="w3-hide w3-white w3-card">
-    <a href="#" class="w3-bar-item w3-button">&#8226;Introduction + Task</a>	
-    <a href="#" class="w3-bar-item w3-button">&#8226;Appointment</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Schedule</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Referral</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;PlanDefinition</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Introduction + Task-Not Implemented</a>	
+    <a href="#" class="w3-bar-item w3-button">&#8226;Appointment-Not Implemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Schedule-Not Implemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;Referral-Not Implemented</a>
+    <a href="#" class="w3-bar-item w3-button">&#8226;PlanDefinition-Not Implemented</a>
   </div>
   
-  <button class="w3-button w3-block w3-left-align" id="financialBtn" onclick="myAccFunc(4)">
-  Financial<i class="fa fa-caret-down"></i>
-  </button>
-   <div id="financialAcc" class="w3-hide w3-white w3-card">
-    <a href="#" class="w3-bar-item w3-button">&#8226;Claim</a>	
-    <a href="#" class="w3-bar-item w3-button">&#8226;Account</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Invoice</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;ChargeItem</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Coverage + Eligibility</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;Request & Response</a>
-    <a href="#" class="w3-bar-item w3-button">&#8226;ExplanationOfBenefit</a>
-  </div>
+  {% if role == 'admin' %}
+    <button class="w3-button w3-block w3-left-align" id="financialBtn" onclick="myAccFunc(4)">
+    Financial<i class="fa fa-caret-down"></i>
+    </button>
+    <div id="financialAcc" class="w3-hide w3-white w3-card">
+      <a href="claim" class="w3-bar-item w3-button">&#8226;Claim</a>	
+      <a href="#" class="w3-bar-item w3-button">&#8226;Account-Not Implemented</a>
+      <a href="#" class="w3-bar-item w3-button">&#8226;Invoice-Not Implemented</a>
+      <a href="#" class="w3-bar-item w3-button">&#8226;ChargeItem-Not Implemented</a>
+      <a href="#" class="w3-bar-item w3-button">&#8226;Coverage + Eligibility-Not Implemented</a>
+      <a href="#" class="w3-bar-item w3-button">&#8226;Request & Response-Not Implemented</a>
+      <a href="#" class="w3-bar-item w3-button">&#8226;ExplanationOfBenefit-Not Implemented</a>
+    </div>
+  {% endif %}
+  
 </div>
 
 <div id="main">
@@ -102,16 +96,18 @@
 <div class="w3-teal">
   <button id="openNav" class="w3-button w3-teal w3-xlarge" onclick="w3_open()">&#9776;</button>
   <div class="w3-container">
-    <h1>FHIR Visualization</h1>
+    <h1>{% block pageHeadline %}FHIR Visualization {% endblock %}</h1>
   </div>
   <div class="username">
-    <h1>{{ username }}</h1><p>Add Logout</p>
+    <h1>{{ username }}</h1><p><a href="/logout">Logout</a></p>
   </div>
 </div>
 
 <div class="w3-container">
 
+{% block content %}
 <p>Welcome, {{ username }}!</p>
+<p>The Idea is for this to be a dashboard page with some general charts, and then the other pages can grab sepcifics</p>
     <form action="/FHIR-Visualizer" method="post" enctype="multipart/form-data">
         <input type="file" name="file" required><br>
         <input type="submit" value="Upload">
@@ -123,6 +119,12 @@
 </div>
 <button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/'">Homepage</button>
 <button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/login'">Login</button>
+
+{% endblock %}
+<div class="button-container" style="position: fixed; bottom: 0; width: 100%; text-align: center;">
+  <button class="w3-button w3-teal" onclick="window.location.href='/FHIR-Visualization'">Dashboard</button>
+  <button class="w3-button w3-teal" onclick="window.location.href='/'">Home Page</button>
+</div>
 
 </div>
 
