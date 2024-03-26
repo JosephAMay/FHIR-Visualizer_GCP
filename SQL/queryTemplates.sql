@@ -13,7 +13,7 @@ select us_core_ethnicity.text.value from `fhir-visualization-project.dataset1.Pa
 #Type of procedure
 select code.text from `fhir-visualization-project.dataset1.Procedure`; 
 #Time procedure happened, how long it took if you do start-end
-select performed.dateTime, performed.period.start, performed.period.end,  from `fhir-visualization-project.dataset1.Procedure`;
+select performed.dateTime, performed.period.start, performed.period.end  from `fhir-visualization-project.dataset1.Procedure`;
 #Who sugery was on
 select subject.patientId from `fhir-visualization-project.dataset1.Procedure`;
 

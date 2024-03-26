@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="../application.py"></script>
+    
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpg" href="../static/fhirLogo.jpg">
-    <title>{% block pageTitle %}FHIR Visualiation: Dashboard {% endblock %}</title>
+    <title id="pageTitle">{% block pageTitle %}FHIR Visualiation: Dashboard {% endblock %}</title>
 
     <style>
       .w3-teal {
@@ -19,7 +19,6 @@
     </style>
 </head>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -108,22 +107,16 @@
 {% block content %}
 <p>Welcome, {{ username }}!</p>
 <p>The Idea is for this to be a dashboard page with some general charts, and then the other pages can grab sepcifics</p>
-    <form action="/FHIR-Visualizer" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required><br>
-        <input type="submit" value="Upload">
-    </form>
     
-    {% if uploaded_filename %}
-    <a href="/download/{{ uploaded_filename }}">Download Your File</a>
-    {% endif %}
 </div>
-<button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/'">Homepage</button>
-<button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/login'">Login</button>
+
 
 {% endblock %}
 <div class="button-container" style="position: fixed; bottom: 0; width: 100%; text-align: center;">
+  <button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/login'">Login</button>
   <button class="w3-button w3-teal" onclick="window.location.href='/FHIR-Visualization'">Dashboard</button>
   <button class="w3-button w3-teal" onclick="window.location.href='/'">Home Page</button>
+  
 </div>
 
 </div>
@@ -193,16 +186,60 @@ function myAccFunc(tabIndex) {
         document.getElementById("financialBtn").classList.remove("w3-green");
       }
       break;
-  }
+    }
 }
-</script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-<script type="text/javascript" charset="utf-8">
-    var socket = io();
-    socket.on('connect', function() {
-        socket.emit('my event', {data: 'I\'m connected!'});
+// JavaScript code for form submission
+document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('checkboxForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            let domain = document.getElementById('pageTitle').textContent;
+
+            let checkboxes = document.getElementsByName('query');
+            let checkedValues = [];
+
+            // Collect checked values and their associated graph types
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    let query = checkboxes[i].value;
+                    let graphType = document.querySelector(`select[name=graphType${i + 1}]`).value;
+                    checkedValues.push({ query, graphType });
+                }
+            }
+            let data = JSON.stringify({checkedValues,domain})
+
+            //send data to server
+            // Send data to server
+            fetch('/process_form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: data
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response from server:', data);
+                // Handle response if needed
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+            
+            /* Construct HTML for displaying graphs
+            let resultContainer = document.querySelector('.result-container');
+            resultContainer.innerHTML = ''; // Clear previous results
+
+            checkedValues.forEach(({ query, graphType }) => {
+                let graphHTML = `<div>Query: ${query}, Graph Type: ${graphType}</div>`; // Replace with actual graph HTML
+                resultContainer.insertAdjacentHTML('beforeend', graphHTML);
+            });
+            */
+        });
     });
+
 </script>
 
 

@@ -1,5 +1,5 @@
 {% extends "fhir_vizualizer.html" %}
-{% block pageTitle %}Practitioner Visualization{% endblock %}
+{% block pageTitle %}Practitioner{% endblock %}
 {% block pageHeadline %}Practitioner Visualization{% endblock %}
 
 {% block content %}
@@ -7,18 +7,17 @@
 <div class="container" style = "display: flex; justify-content: space-between;">
     <div class="form-container" style="width: calc(33% - 20px); background-color: lightgrey; padding: 10px; border: 1px solid grey;">
         <form id="checkboxForm">
-            <label><input type="checkbox" name="option1" value="Option 1"> Option 1</label><br>
+            <label><input type="checkbox" name="query" value="gender"> Gender</label><br>
             <div id="followUp1" class="follow-up">
                 <label>Graph Type:
                     <select name="graphType1">
                         <option value="bar">Bar Chart</option>
-                        <option value="line">Line Chart</option>
                         <option value="pie">Pie Chart</option>
                     </select>
                 </label>
             </div>
             <br>
-            <label><input type="checkbox" name="option2" value="Option 2"> Option 2</label><br>
+            <label><input type="checkbox" name="query" value="address"> Address</label><br>
             <div id="followUp2" class="follow-up">
                 <label>Graph Type:
                     <select name="graphType2">
@@ -30,8 +29,7 @@
             </div>
             <br>
             
-
-            <input type="submit" value="Submit">
+            <button type="submit">Submit</button>
         </form>
     </div>
     <div class="result-container" style = "width: calc(67% - 20px); padding: 20px;">
@@ -39,20 +37,3 @@
     </div>
 </div>
 {% endblock %}
-
-<script>
-    const form = document.getElementById('checkboxForm');
-    const checkboxes = form.querySelectorAll('input[type="checkbox"]');
-
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const followUpId = this.name.replace('option', 'followUp');
-            const followUp = document.getElementById(followUpId);
-            if (this.checked) {
-                followUp.style.display = 'block';
-            } else {
-                followUp.style.display = 'none';
-            }
-        });
-    });
-</script>

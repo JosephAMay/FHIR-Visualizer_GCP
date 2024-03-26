@@ -1,13 +1,13 @@
 {% extends "fhir_vizualizer.html" %}
-{% block pageTitle %}MedicationRequest{% endblock %}
-{% block pageHeadline %}Medication Requests Visualization{% endblock %}
+{% block pageTitle %}Condition{% endblock %}
+{% block pageHeadline %}Procedure Visualization{% endblock %}
 
 {% block content %}
 
 <div class="container" style = "display: flex; justify-content: space-between;">
     <div class="form-container" style="width: calc(33% - 20px); background-color: lightgrey; padding: 10px; border: 1px solid grey;">
         <form id="checkboxForm">
-            <label><input type="checkbox" name="query" value="orderer"> Proscribing Doctor</label><br>
+            <label><input type="checkbox" name="query" value="patients"> Patients with conditions</label><br>
             <div id="followUp1" class="follow-up">
                 <label>Graph Type:
                     <select name="graphType1">
@@ -18,7 +18,7 @@
                 </label>
             </div>
             <br>
-            <label><input type="checkbox" name="query" value="patient"> Medication Reciever</label><br>
+            <label><input type="checkbox" name="query" value="types"> Condition types</label><br>
             <div id="followUp2" class="follow-up">
                 <label>Graph Type:
                     <select name="graphType2">
@@ -29,8 +29,8 @@
                 </label>
             </div>
             <br>
-
-            <label><input type="checkbox" name="query" value="medType"> Medications Proscribed</label><br>
+            
+            <label><input type="checkbox" name="query" value="status"> Condition Statuses</label><br>
             <div id="followUp3" class="follow-up">
                 <label>Graph Type:
                     <select name="graphType3">
@@ -41,23 +41,11 @@
                 </label>
             </div>
             <br>
-
-            <label><input type="checkbox" name="query" value="status"> Fulfillment Status</label><br>
+            
+            <label><input type="checkbox" name="query" value="howFound"> Condition & diagnoses location</label><br>
             <div id="followUp4" class="follow-up">
                 <label>Graph Type:
                     <select name="graphType4">
-                        <option value="bar">Bar Chart</option>
-                        <option value="line">Line Chart</option>
-                        <option value="pie">Pie Chart</option>
-                    </select>
-                </label>
-            </div>
-            <br>
-            
-            <label><input type="checkbox" name="query" value="time"> Request Age</label><br>
-            <div id="followUp5" class="follow-up">
-                <label>Graph Type:
-                    <select name="graphType5">
                         <option value="bar">Bar Chart</option>
                         <option value="line">Line Chart</option>
                         <option value="pie">Pie Chart</option>
