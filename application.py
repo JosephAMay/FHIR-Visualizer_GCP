@@ -134,9 +134,7 @@ def process_form():
     
     #Send to chart Making code
     results = visualizeData(domain,values)
-    #result = ', '.join(checked_values)
-    result = 'Pending Some kinks'
-    
+    #print(results)
     #Send back data
     return jsonify({'result': results})
 
@@ -280,20 +278,21 @@ def visualizeData(domain,values):
                 results = query_job.result()
                 queryResults.append([results, item['graphType']])
     
-        makeCharts(queryResults)
+        
 
     #Domain not in list of possible domains
     else:
         print('Domain mismatch, form Domain does not match with possible query domains')
 
+    returnedData = []
+    if queryResults: #If something was returned from the query
+        for result in queryResults:
+        #Iterate through query results, turn results into dataframe then to json, and associate data with requested chart type to return
+        #To webpage for rendering
+            returnedData.append({'data': result[0].to_dataframe().to_json(),'chartType': result[-1]})
+        
+    return returnedData
+
     
-    return
-
-def makeCharts(resultList):
-    for thing in resultList:
-        results = thing[0]
-        for item in results:
-            print(item)
-
 if __name__ == '__main__':
     app.run(debug=True)

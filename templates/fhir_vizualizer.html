@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let data = JSON.stringify({checkedValues,domain})
 
             //send data to server
-            // Send data to server
+            
             fetch('/process_form', {
                 method: 'POST',
                 headers: {
@@ -221,14 +221,19 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(response => response.json())
             .then(data => {
                 console.log('Response from server:', data);
-                // Handle response if needed
+                chartResults(data)
             })
             .catch(error => {
                 console.error('Error:', error);
             });
 
             
-            /* Construct HTML for displaying graphs
+            
+        });
+    });
+
+    function chartResults(data){
+      /* Construct HTML for displaying graphs
             let resultContainer = document.querySelector('.result-container');
             resultContainer.innerHTML = ''; // Clear previous results
 
@@ -237,9 +242,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 resultContainer.insertAdjacentHTML('beforeend', graphHTML);
             });
             */
-        });
-    });
 
+
+
+    }
 </script>
 
 
