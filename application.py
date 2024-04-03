@@ -123,21 +123,7 @@ def about():
     if(not OVER_CAPACITY):
         return render_template('about.html')
 
-@app.route('/process_form', methods=['POST'])
-def process_form():
-    
-    #Grab data sent from webpage
-    data = request.get_json()
-    #Get domain, query & chart Type
-    domain = data.get('domain', None)
-    values = data.get('checkedValues',[])
-    
-    #Send to chart Making code
-    results = visualizeData(domain,values)
-    #print(results)
-    #Send back data
-    return jsonify({'result': results})
-
+#Pages for each individual query option
 @app.route('/patient', methods=['GET', 'POST'])
 @login_required
 def patient():
@@ -162,6 +148,21 @@ def medrequest():
 @login_required
 def procedure():
     return render_template('procedure.html', username=session['username'],role=session['role'])
+
+@app.route('/process_form', methods=['POST'])
+def process_form():
+    
+    #Grab data sent from webpage
+    data = request.get_json()
+    #Get domain, query & chart Type
+    domain = data.get('domain', None)
+    values = data.get('checkedValues',[])
+    
+    #Send to chart Making code
+    results,numGraphs = visualizeData(domain,values)
+    
+    #Send back data
+    return jsonify({'result': results, 'numGraphs': numGraphs})
 
 #Based on queries, domain, and chart type asked for, graph results and send back to webpage
 def visualizeData(domain,values):
@@ -278,20 +279,21 @@ def visualizeData(domain,values):
                 results = query_job.result()
                 queryResults.append([results, item['graphType']])
     
-        
-
     #Domain not in list of possible domains
     else:
         print('Domain mismatch, form Domain does not match with possible query domains')
 
     returnedData = []
     if queryResults: #If something was returned from the query
-        for result in queryResults:
+        for i, result in enumerate(queryResults):
         #Iterate through query results, turn results into dataframe then to json, and associate data with requested chart type to return
         #To webpage for rendering
-            returnedData.append({'data': result[0].to_dataframe().to_json(),'chartType': result[-1]})
-        
-    return returnedData
+            returnedData.append({'data': result[0].to_dataframe().to_json(orient='records'),'chartType': result[-1]})
+            #returnedData[i] = {'data': result[0].to_dataframe().to_json(orient='records'), 'chartType': result[-1]}
+    #Add the number of graphs to display on the webpage
+    numGraphs = len(returnedData)
+    
+    return returnedData, numGraphs
 
     
 if __name__ == '__main__':

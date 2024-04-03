@@ -17,6 +17,8 @@
           margin-right: 20px; /* Adjust the margin as needed */
       }
     </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
 </head>
 
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -111,6 +113,11 @@
 </div>
 
 
+<div class="result-container" style = "width: calc(67% - 20px); padding: 20px; overflow: auto;">
+
+</div>
+
+
 {% endblock %}
 <div class="button-container" style="position: fixed; bottom: 0; width: 100%; text-align: center;">
   <button class="w3-button w3-teal homeButton" style="text-align: center;" onclick="window.location.href='/login'">Login</button>
@@ -189,6 +196,8 @@ function myAccFunc(tabIndex) {
     }
 }
 
+
+
 // JavaScript code for form submission
 document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('checkboxForm').addEventListener('submit', function(event) {
@@ -232,20 +241,237 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    function chartResults(data){
-      /* Construct HTML for displaying graphs
-            let resultContainer = document.querySelector('.result-container');
-            resultContainer.innerHTML = ''; // Clear previous results
+function chartResults(chartData) {
+    // Select the result container
+    var resultContainer = d3.select(".result-container");
+    var row = null;
+    // Loop through each entry in the JSON object
+    chartData.result.forEach(function(entry, index) {
+          
+      
+        // Parse the data string to convert it into JSON object
+        if (typeof entry === 'object' && entry !== null) {
+          var data = JSON.parse(entry.data);
+          var totCharts = entry.numGraphs;
+          var svg;
+          // Calculate graph width based on number of charts
+          var graphWidth = 100 / 2 - 20; // Two charts per row
+          var chartLength = graphWidth
+          
+          // Create a new row for graphs every 2 graphs (show in rows of 2 max)
+        //Also makes a row for 1st chart to put in its place
+        if (index % 2 === 0 || index === 0) {
+            row = resultContainer.append("div")
+            .classed("row", true)
+            .style("margin-bottom", "20px");
+        }
+          
+          // Create a new SVG element for each chart
+          svg = row.append("svg")
+            .attr("width", graphWidth + "%")
+            .attr("height", 200)
+            .attr("length",chartLength + "%")
+            .style("padding", "0 10px");
+                 
+          // Check the chart type and create corresponding chart
+          switch (entry.chartType) {
+              case "bar":
+                  createBarChart(data, svg);
+                  break;
+              case "pie":
+                  createPieChart(data, svg);
+                  break;
+              case "line":
+                  createLineChart(data, svg);
+                  break;
+              case "table":
+                  createTable(data, svg);
+                  break;
+              default:
+                  console.log("Unknown / unsupported chart type:", entry.chartType)
+          }
+        }
+    });
+    
+}
 
-            checkedValues.forEach(({ query, graphType }) => {
-                let graphHTML = `<div>Query: ${query}, Graph Type: ${graphType}</div>`; // Replace with actual graph HTML
-                resultContainer.insertAdjacentHTML('beforeend', graphHTML);
+
+// Function to create a bar chart
+function createBarChart(data, svg) {
+    console.log("Bar chart with:", data)
+    var processedData = Object.keys(data).map(function(key) {
+        return { x: key, y: data[key] };
+    });
+    // Assuming data is an array of objects with 'x' and 'y' properties
+    var margin = { top: 20, right: 20, bottom: 30, left: 40 },
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom;
+
+    var x = d3.scaleBand()
+        .rangeRound([0, width])
+        .padding(0.1)
+        .domain(data.map(function(d) { return d.x; }));
+
+    var y = d3.scaleLinear()
+        .rangeRound([height, 0])
+        .domain([0, d3.max(data, function(d) { return d.y; })]);
+
+    var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    g.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    g.append("g")
+        .attr("class", "axis axis--y")
+        .call(d3.axisLeft(y).ticks(10, "%"))
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+        .text("Frequency");
+
+    g.selectAll(".bar")
+        .data(data)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.x); })
+        .attr("y", function(d) { return y(d.y); })
+        .attr("width", x.bandwidth())
+        .attr("height", function(d) { return height - y(d.y); });
+}
+
+
+function createPieChart(data, svg) {
+  console.log("Pie chart with:", data)
+  var processedData = Object.keys(data).map(function(key) {
+        return { label: key, value: data[key] };
+    });
+    // Assuming data is an array of objects with 'label' and 'value' properties
+    var radius = Math.min(svg.attr("width"), svg.attr("height")) / 2;
+    var g = svg.append("g").attr("transform", "translate(" + radius + "," + radius + ")");
+
+    var color = d3.scaleOrdinal(d3.schemeCategory10);
+    var pie = d3.pie().value(function(d) { return d.value; });
+    var arc = d3.arc().outerRadius(radius - 10).innerRadius(0);
+
+    var arcs = g.selectAll("arc")
+        .data(pie(data))
+        .enter()
+        .append("g")
+        .attr("class", "arc");
+
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", function(d) { return color(d.data.label); });
+
+    var legend = svg.selectAll(".legend")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(20," + i * 20 + ")"; });
+
+    legend.append("rect")
+        .attr("x", radius * 2)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", function(d) { return color(d.label); });
+
+    legend.append("text")
+        .attr("x", radius * 2 - 6)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) { return d.label; });
+}
+
+
+function createLineChart(data, svg) {
+  console.log("Line chart with:", data)
+  // Convert data object into an array of { x, y } objects
+  var processedData = Object.keys(data).map(function(key) {
+        return { x: key, y: data[key] };
+    });
+
+    // Assuming data is an array of objects with 'x' and 'y' properties
+    var margin = { top: 20, right: 20, bottom: 30, left: 50 },
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom;
+
+    var x = d3.scaleLinear().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+
+    var line = d3.line()
+        .x(function(d) { return x(d.x); })
+        .y(function(d) { return y(d.y); });
+
+    var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    x.domain(d3.extent(data, function(d) { return d.x; }));
+    y.domain(d3.extent(data, function(d) { return d.y; }));
+
+    g.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    g.append("g")
+        .attr("class", "axis axis--y")
+        .call(d3.axisLeft(y))
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+        .text("Value");
+
+    g.append("path")
+        .datum(data)
+        .attr("class", "line")
+        .attr("d", line);
+}
+
+
+function createTable(data, svg) {
+  console.log("Table chart with:", data)
+  // Convert data object into an array of { x, y } objects
+  var processedData = Object.keys(data).map(function(key) {
+        var obj = {};
+        obj[key] = data[key];
+        return obj;
+    });
+    // Assuming data is an array of objects with properties representing table columns
+    var table = svg.append("table");
+    var thead = table.append("thead").append("tr");
+    var tbody = table.append("tbody");
+
+    // Append table headers
+    thead.selectAll("th")
+        .data(d3.keys(data[0]))
+        .enter().append("th")
+        .text(function(column) { return column; });
+
+    // Create table rows
+    var rows = tbody.selectAll("tr")
+        .data(data)
+        .enter().append("tr");
+
+    // Populate table cells with data
+    var cells = rows.selectAll("td")
+        .data(function(row) {
+            return d3.keys(row).map(function(column) {
+                return { column: column, value: row[column] };
             });
-            */
+        })
+        .enter().append("td")
+        .text(function(d) { return d.value; });
+}
 
-
-
-    }
 </script>
 
 
