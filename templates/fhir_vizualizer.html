@@ -265,18 +265,34 @@ function chartResults(chartData) {
             .classed("row", true)
             .style("margin-bottom", "20px");
         }
+
+        
+      var chartContainer = row.append("div")
+          .classed("chart-container", true)
+          .style("margin-bottom", "20px")
+          .style("display", "flex")
+          .style("flex-direction", "column");
+
+      // Create a new SVG element for each chart
+      svg = chartContainer.append("svg")
+          .attr("width", graphWidth + "%")
+          .attr("height", 200)
+          .attr("length", chartLength + "%")
+          .style("padding", "0 10px");
+
+      // Add download button for the chart
+      var downloadButton = chartContainer.append("button")
+          .text("Download")
+          .on("click", function() {
+              downloadChartAsImage(svg.node(), entry.chartType + "_chart.png");
+          });
           
-          // Create a new SVG element for each chart
-          svg = row.append("svg")
-            .attr("width", graphWidth + "%")
-            .attr("height", 200)
-            .attr("length",chartLength + "%")
-            .style("padding", "0 10px");
+          
                  
           // Check the chart type and create corresponding chart
           switch (entry.chartType) {
               case "bar":
-                  createBarChart(data, svg);
+                  createMultBarCharts(data, svg);
                   break;
               case "pie":
                   createPieChart(data, svg);
@@ -295,55 +311,101 @@ function chartResults(chartData) {
     
 }
 
-
-// Function to create a bar chart
-function createBarChart(data, svg) {
-    console.log("Bar chart with:", data)
-    var processedData = Object.keys(data).map(function(key) {
-        return { x: key, y: data[key] };
+// Function to create a bar chart for each key in the data objects
+function createMultBarCharts(data, svg) {
+    console.log("Creating MULTIPLE(?) bar charts with data:", data);
+    
+    // Get all unique keys in the data objects
+    var keys = [];
+    data.forEach(function(datum) {
+        Object.keys(datum).forEach(function(key) {
+            if (!keys.includes(key)) {
+                keys.push(key);
+            }
+        });
     });
-    // Assuming data is an array of objects with 'x' and 'y' properties
+    
+    // Create a bar chart for each key
+    keys.forEach(function(key) {
+        createBarChart(data, svg, key);
+    });
+}
+
+// Function to create a bar chart for a specific key
+function createBarChart(data, svg, key) {
+    console.log("Bar chart for key:", key);
+
+    // Count occurrences of each unique value
+    var counts = {};
+    data.forEach(function(d) {
+        counts[d[key]] = (counts[d[key]] || 0) + 1;
+    });
+
+    // Convert counts object into array of objects
+    var processedData = Object.keys(counts).map(function(key) {
+        return { x: key, y: counts[key] };
+    });
+
+    // Set up SVG dimensions
     var margin = { top: 20, right: 20, bottom: 30, left: 40 },
-        width = +svg.attr("width") - margin.left - margin.right,
-        height = +svg.attr("height") - margin.top - margin.bottom;
+        width = 400 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
 
-    var x = d3.scaleBand()
-        .rangeRound([0, width])
-        .padding(0.1)
-        .domain(data.map(function(d) { return d.x; }));
-
-    var y = d3.scaleLinear()
-        .rangeRound([height, 0])
-        .domain([0, d3.max(data, function(d) { return d.y; })]);
-
+    // Append a 'g' element to the SVG to contain the chart
     var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    g.append("g")
-        .attr("class", "axis axis--x")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
+    // Create scales
+    var x = d3.scaleBand()
+        .range([0, width])
+        .padding(0.1)
+        .domain(processedData.map(function(d) { return d.x; }));
 
-    g.append("g")
-        .attr("class", "axis axis--y")
-        .call(d3.axisLeft(y).ticks(10, "%"))
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", "0.71em")
-        .attr("text-anchor", "end")
-        .text("Frequency");
+    var y = d3.scaleLinear()
+        .range([height, 0])
+        .domain([0, d3.max(processedData, function(d) { return d.y; })]);
 
+    // Add bars
     g.selectAll(".bar")
-        .data(data)
+        .data(processedData)
         .enter().append("rect")
         .attr("class", "bar")
         .attr("x", function(d) { return x(d.x); })
-        .attr("y", function(d) { return y(d.y); })
         .attr("width", x.bandwidth())
+        .attr("y", function(d) { return y(d.y); })
         .attr("height", function(d) { return height - y(d.y); });
-}
 
+    // Add x-axis
+    g.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    // Add y-axis
+    g.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(y));
+
+    // Append a container for the download button
+    var buttonContainer = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + (height + margin.top + 10) + ")");
+
+    // Add download button
+    buttonContainer.append("rect")
+        .attr("width", 80)
+        .attr("height", 30)
+        .style("fill", "blue")
+        .style("cursor", "pointer");
+
+    buttonContainer.append("text")
+        .attr("x", 40)
+        .attr("y", 20)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central")
+        .style("fill", "white")
+        .style("font-size", "14px")
+        .text("Download");
+}
 
 function createPieChart(data, svg) {
   console.log("Pie chart with:", data)
@@ -470,6 +532,34 @@ function createTable(data, svg) {
         })
         .enter().append("td")
         .text(function(d) { return d.value; });
+}
+
+function downloadChartAsImage(svgElement, filename) {
+    var svgString = new XMLSerializer().serializeToString(svgElement);
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+    var DOMURL = window.URL || window.webkitURL || window;
+
+    var img = new Image();
+    var svg = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    var url = DOMURL.createObjectURL(svg);
+
+    img.onload = function() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.width = img.width;
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0);
+        DOMURL.revokeObjectURL(url);
+
+        var a = document.createElement("a");
+        a.download = filename;
+        a.href = canvas.toDataURL("image/png");
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    img.src = url;
 }
 
 </script>

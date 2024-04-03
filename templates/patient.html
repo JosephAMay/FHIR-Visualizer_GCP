@@ -4,8 +4,8 @@
 
 {% block content %}
 
-<div class="container" style = "display: flex; justify-content: space-between;">
-    <div class="form-container" style="width: calc(33% - 20px); background-color: lightgrey; padding: 10px; border: 1px solid grey;">
+<div class="container" style="display: flex; justify-content: space-between;">
+    <div class="form-container" style="width: calc(50% - 20px); background-color: lightgrey; padding: 10px; border: 1px solid grey; overflow: auto;">
         <form id="checkboxForm">
             <label><input type="checkbox" name="query" value="birthdate"> Patient Birthdates</label><br>
             <div id="followUp1" class="follow-up">
@@ -53,7 +53,8 @@
             <button type="submit">Submit</button>
         </form>
     </div>
-    <div class="result-container"></div>
+    <div class="result-container" style="width: calc(50% - 20px); padding: 20px; overflow: auto;">
+    </div>
     
 </div>
 {% endblock %}
