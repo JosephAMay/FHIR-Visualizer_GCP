@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 import csv
 import sys
 import time  
+import random
 from google.cloud import bigquery
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -154,42 +155,57 @@ def process_form():
     
     #Grab data sent from webpage
     data = request.get_json()
+    
     #Get domain, query & chart Type
     domain = data.get('domain', None)
+    uniqueDom = set(domain)
     values = data.get('checkedValues',[])
+    print(data)
+    adminData = data.get('adminData',{})
+    adminQuery = adminData.get('query','')
+    adminGraphyType = adminData.get('graphType','')
+    if adminQuery:
+        adminData = [adminQuery,adminGraphyType]
+    else:
+        adminData = None
     
     #Send to chart Making code
-    results,numGraphs = visualizeData(domain,values)
+    results,numGraphs = visualizeData(uniqueDom,values,adminData)
     
     #Send back data
     return jsonify({'result': results, 'numGraphs': numGraphs})
 
 #Based on queries, domain, and chart type asked for, graph results and send back to webpage
-def visualizeData(domain,values):
-    
+def visualizeData(domains,values,adminData):
+
+    POSSIBLE_DOMAINS = {'Patient','Procedure','Practitioner','MedicationRequest','Condition','Claim'}
     #Grab GCP daatsetID and project ID to use for queries
     global DATASET_ID
     global PROJECT_ID
 
     queryResults = [] #Hold query results to pass into chart code
-    #print('Domain =', domain)
-    #print(values)
-
+    #print('Domain =', type(domains),"\t",domains,'\t',values)
     
-    #Route queries based on domain
-    POSSIBLE_DOMAINS = ['Patient','Procedure','Practitioner','MedicationRequest','Condition','Claim']
+    returnedData = []
+    numGraphs = 0
+
+    uniqueDom = domains.intersection(POSSIBLE_DOMAINS)
+    #print('Unsupported domains in request: ', domains - POSSIBLE_DOMAINS)
+
     #Route to query based on domain
-    if domain in POSSIBLE_DOMAINS:
+    for domain in uniqueDom:
+    
         #set table id, which should match with domain name
         table_id = domain
         table_ref = f"{PROJECT_ID}.{DATASET_ID}.{table_id}"
-        print('ChartVisualizer table refrence is:',table_ref)
+        #print('ChartVisualizer table refrence is:',table_ref)
 
         #Match with domain, Loop through different query options associated with domain
         #For any query option slected, execute query, connect query results with desired 
         #Chart type to be charted and sent back to webpage. 
         if domain == 'Patient':
             for item in values:
+                qran = True
                 if item['query'] == 'birthdate':
                     query = f"select birthDate from {table_ref} LIMIT 1000;"
                 elif item['query'] == 'gender':
@@ -198,37 +214,47 @@ def visualizeData(domain,values):
                     query = f"select us_core_ethnicity.text.value from {table_ref} LIMIT 1000;"
                 elif item['query'] == 'birthPlace':
                     query = f"select patient_birthPlace.value.address from {table_ref} LIMIT 1000;"
-                
-                query_job = bqClient.query(query)
-                results = query_job.result()
-                queryResults.append([results, item['graphType']])
+                else:
+                    qran=False
+                if(qran):
+                    query_job = bqClient.query(query)
+                    results = query_job.result()
+                    queryResults.append([results, item['graphType']])
 
         elif domain == 'Procedure':
             for item in values:
+                qran = True
                 if item['query'] == 'type':
                     query = f"select code.text from {table_ref};"
                 elif item['query'] == 'performed':
                     query = f"select performed.dateTime, performed.period.start, performed.period.end  from {table_ref};"
                 elif item['query'] == 'patient':
                     query = f"select subject.patientId from  {table_ref};"
-
-                query_job = bqClient.query(query)
-                results = query_job.result()
-                queryResults.append([results, item['graphType']])
+                else:
+                    qran=False
+                if(qran):
+                    query_job = bqClient.query(query)
+                    results = query_job.result()
+                    queryResults.append([results, item['graphType']])
 
         elif domain == 'Practitioner':
             for item in values:
+                qran = True
                 if item['query'] == 'gender':
                     query = f"select gender from {table_ref} limit 1000;"
                 elif item['query'] == 'address':
                     query = f"select a.city, a.postalCode, a.state from {table_ref}, unnest(address) as a limit 1000;"
                 
-                query_job = bqClient.query(query)
-                results = query_job.result()
-                queryResults.append([results, item['graphType']])
+                else:
+                    qran=False
+                if(qran):
+                    query_job = bqClient.query(query)
+                    results = query_job.result()
+                    queryResults.append([results, item['graphType']])
 
         elif domain == 'MedicationRequest':
             for item in values:
+                qran = True
                 if item['query'] == 'orderer':
                     query = f"select requester.display from  {table_ref} LIMIT 1000;"
                 elif item['query'] == 'patient':
@@ -240,12 +266,16 @@ def visualizeData(domain,values):
                 elif item['query'] == 'time':
                     query = f"SELECT authoredOn FROM {table_ref} LIMIT 1000;"
 
-                query_job = bqClient.query(query)
-                results = query_job.result()
-                queryResults.append([results, item['graphType']])
+                else:
+                    qran=False
+                if(qran):
+                    query_job = bqClient.query(query)
+                    results = query_job.result()
+                    queryResults.append([results, item['graphType']])
 
         elif domain == 'Condition':
             for item in values:
+                qran = True
                 if item['query'] == 'patients':
                     query = f"select subject.patientId from {table_ref} limit 1000;"
 
@@ -258,12 +288,16 @@ def visualizeData(domain,values):
                 elif item['query'] == 'howFound':
                     query = f"select encounter_type.text as FoundBecauseOf, condition.code.text as CurrentCondition from {table_ref} as condition join {table_ref} as encounter on encounter.id = condition.encounter.encounterId cross join unnest(encounter.type) as encounter type;"
 
-                query_job = bqClient.query(query)
-                results = query_job.result()
-                queryResults.append([results, item['graphType']])
+                else:
+                    qran=False
+                if(qran):
+                    query_job = bqClient.query(query)
+                    results = query_job.result()
+                    queryResults.append([results, item['graphType']])
 
         elif domain == 'Claim':
             for item in values:
+                qran = True
                 if item['query'] == 'type':
                     query = f"select c.code as claimType from {table_ref}, unnest(type.coding) as c limit 1000;"
                 elif item['query'] == 'claimInfo':
@@ -275,15 +309,19 @@ def visualizeData(domain,values):
                 elif item['query'] == 'claimAmount':
                     query = f"select sum(total.value) as total_sum from {table_ref} where status = 'Active'";
 
-                query_job = bqClient.query(query)
-                results = query_job.result()
-                queryResults.append([results, item['graphType']])
+                else:
+                    qran=False
+                if(qran):
+                    query_job = bqClient.query(query)
+                    results = query_job.result()
+                    queryResults.append([results, item['graphType']])
     
-    #Domain not in list of possible domains
-    else:
-        print('Domain mismatch, form Domain does not match with possible query domains')
+    #If there is an admin Query, run it and grab results and graph type
+    if adminData:
+        query_job = bqClient.query(adminData[0])
+        results = query_job.result()
+        queryResults.append([results, adminData[-1]])
 
-    returnedData = []
     if queryResults: #If something was returned from the query
         for i, result in enumerate(queryResults):
         #Iterate through query results, turn results into dataframe then to json, and associate data with requested chart type to return
@@ -297,4 +335,5 @@ def visualizeData(domain,values):
 
     
 if __name__ == '__main__':
+    random.seed(0)
     app.run(debug=True)

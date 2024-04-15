@@ -4,8 +4,8 @@
 
 {% block content %}
 
-<div class="container" style = "display: flex; justify-content: space-between;">
-    <div class="form-container" style="width: calc(33% - 20px); background-color: lightgrey; padding: 10px; border: 1px solid grey;">
+<div class="container" style="display: flex; justify-content: space-between; height: 70vh;">
+    <div class="form-container" style="width: calc(50% - 20px); height: 70vh; background-color: lightgrey; padding: 10px; border: 1px solid grey; overflow: auto;">
         <form id="checkboxForm">
             <label><input type="checkbox" name="query" value="type"> Procedure Type</label><br>
             <div id="followUp1" class="follow-up">
@@ -41,6 +41,21 @@
                 </label>
             </div>
             <br>
+            {% if role == 'admin'%}
+            <label><textarea id="adminQuery" rows="2" cols="50" name="adminquery" placeholder="Enter CustomQuery & select graph type. "></textarea></label><br>
+            <div id="adminfollowUp1" class="follow-up">
+                <label>Graph Type:
+                    <select name="admingraphType">
+                        <option value="bar">Bar Chart</option>
+                        <option value="line">Line Chart</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="table">Table</option>
+                        <option value="number">number</option>
+                    </select>
+                </label>
+            </div>
+            <br>
+            {% endif %}
             
 
             <button type="submit">Submit</button>
