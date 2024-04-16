@@ -611,7 +611,7 @@ function chartDashboard(data) {
                           .style("flex-direction", "column");
 
       //Number of patients
-      createNumberChart(data['result'][1],chartContainer, "Current Number Of Patients")
+      createNumberChart(data['result'][6],chartContainer, "Current Number Of Patients")
 
       //Insurance claims totals
       chartContainer = dashboardContainer.append("div")
@@ -631,7 +631,7 @@ function chartDashboard(data) {
                     chartContainer.style("margin-bottom", "20px")
                     .style("display", "flex")
                     .style("flex-direction", "column");
-      createNumberChart(data['result'][6],chartContainer, "Number of Operations Performed")
+      createNumberChart(data['result'][0],chartContainer, "Number of Operations Performed")
 
       //Claim Types
       parsedData = JSON.parse(data['result'][2].data);
@@ -657,7 +657,7 @@ function chartDashboard(data) {
                     chartContainer.style("margin-bottom", "20px")
                     .style("display", "flex")
                     .style("flex-direction", "column");
-      var parsedData = JSON.parse(data['result'][1].data);
+      var parsedData = JSON.parse(data['result'][5].data);
       var editedData=[];
       parsedData.forEach(obj=>{
         if (typeof obj === 'object' && obj !== null) {
@@ -684,7 +684,7 @@ function chartDashboard(data) {
       
       
       //Types of operations performed
-      parsedData = JSON.parse(data['result'][7].data);
+      parsedData = JSON.parse(data['result'][1].data);
       editedData=[];
       parsedData.forEach(obj=>{
         if (typeof obj === 'object' && obj !== null) {
@@ -710,7 +710,8 @@ function chartDashboard(data) {
                       .style("flex-direction", "column")
                       .style('overflow-y', 'auto');
 
-      createTable(data['result'][7].data,dashboardContainer,"Medication Types",'text')
+      var parsedData = JSON.parse(data['result'][7].data);
+      createTable(parsedData,dashboardContainer,"Medication Types",'text')
       
   
 }
@@ -718,8 +719,8 @@ function chartDashboard(data) {
 function createTable(data, resultContainer, title='',key) {
     // Parse the JSON string
     console.log("DATA in createTable" , data,"\nKeyis:",key)
-    key = "address";
-    //var parsedData = JSON.parse(data.data);
+    
+    
 
     // Create a container div
     var containerDiv = document.createElement('div');
